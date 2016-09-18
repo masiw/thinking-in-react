@@ -1,29 +1,50 @@
 import React from 'react'
 import _ from 'lodash'
 
-export class FilterableProductTable extends React.Component {
-    render() {
-        let groupedProds = _.groupBy(this.props.products, 'category')
+export const FilterableProductTable = React.createClass({
+    getInitialState: function() {
+        return {
+            filterText: '',
+            inStockOnly: false
+        }
+    },
+    render: function() {
+        let groupedProds = _.groupBy(
+                _.filter(this.props.products, product =>
+                    !this.state.inStockOnly || product.inStock
+                    && _.includes(product.name, this.state.filterText)
+                )
+            , 'category')
           , data = _.map(_.keys(groupedProds), key => {return {name: key, products: groupedProds[key]}})
         return (
             <div>
-                <SearchBar />
+                <SearchBar
+                    filterText={this.state.filterText}
+                    inStockOnly={this.state.inStockOnly}
+                    />
                 <ProductTable products={data}/>
             </div>
         )
     }
-}
+})
 
-export class SearchBar extends React.Component {
-    render() {
+export const SearchBar = React.createClass ({
+    render: function() {
+        let isChecked = this.props.inStockOnly ? true : null
         return (
-            <input type='search' name='product-search' placeholder='Search...'></input>
+            <div>
+                <input type='search' name='product-search' placeholder='Search...' value={this.props.filterText}></input>
+                <label>
+                    <input type='checkbox' value={isChecked}></input>
+                    Only show products in stock
+                </label>
+            </div>
         )
     }
-}
+})
 
-export class ProductTable extends React.Component {
-    render() {
+export const ProductTable = React.createClass ({
+    render: function() {
         console.log(JSON.stringify(this.props.products))
         let content = this.props.products.map(category => {
             let products = category.products.map(product =>
@@ -47,9 +68,9 @@ export class ProductTable extends React.Component {
             </table>
         )
     }
-} 
+})
 
-export class ProductCategoryRow extends React.Component {
+export const ProductCategoryRow = React.createClass ({
     render() {
         return (
             <tr>
@@ -57,9 +78,9 @@ export class ProductCategoryRow extends React.Component {
             </tr>
         )
     }
-}
+})
 
-export class ProductRow extends React.Component {
+export const ProductRow = React.createClass ({
     render() {
         return (
             <tr>
@@ -68,4 +89,4 @@ export class ProductRow extends React.Component {
             </tr>
         )
     }
-}
+})
